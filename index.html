@@ -11,6 +11,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Noto+Serif+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- 카카오 지도 SDK (services 라이브러리: 주소 검색용) -->
+<!-- KAKAO_KEY_HERE 자리에 카카오 JavaScript 키를 넣으세요 -->
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=KAKAO_KEY_HERE&libraries=services&autoload=false"></script>
 <style>
 :root {
   --bg-a: #f7f0df;
@@ -316,6 +319,101 @@ body {
 .search-btn svg { width: 16px; height: 16px; }
 
 .search-results { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+/* 현재 위치 버튼 */
+.current-loc-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--cream);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+  transition: transform 0.15s;
+}
+.current-loc-btn:active { transform: scale(0.97); }
+.current-loc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.current-loc-btn svg { width: 16px; height: 16px; }
+.current-loc-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* 구분선 또는 */
+.divider-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 14px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--divider);
+  opacity: 0.5;
+}
+.divider-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* 토글 스위치 */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.toggle-text { flex: 1; }
+.toggle-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.toggle-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #d6cec2;
+  border-radius: 9999px;
+  transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  background: white;
+  border-radius: 9999px;
+  transition: transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
 .search-item { width: 100%; text-align: left; padding: 12px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card); cursor: pointer; font-family: inherit; }
 .search-item .name { font-size: 14px; color: var(--text-soft); line-height: 1.4; }
 .search-item .coord { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
@@ -584,8 +682,22 @@ body {
       <!-- Office -->
       <div class="set-section">
         <h2 class="set-title">사무실 위치</h2>
-        <p class="set-desc">주소 또는 건물명을 검색하세요</p>
+        <p class="set-desc">주소 검색 또는 현재 위치로 지정하세요</p>
         <div id="office-box-wrap"></div>
+
+        <!-- 현재 위치로 지정 버튼 (가장 정확) -->
+        <button class="current-loc-btn" id="btn-current-loc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+          <span>현재 위치를 사무실로 지정</span>
+        </button>
+        <div class="current-loc-hint">사무실에서 이 버튼을 누르세요 · GPS로 가장 정확합니다</div>
+
+        <div class="divider-or">
+          <span class="divider-line"></span>
+          <span class="divider-text">또는 주소 검색</span>
+          <span class="divider-line"></span>
+        </div>
+
         <div class="search-row">
           <input type="text" class="search-input" id="search-input" placeholder="예: 서울 강남구 테헤란로 123">
           <button class="search-btn" id="search-btn">
@@ -593,6 +705,22 @@ body {
           </button>
         </div>
         <div class="search-results" id="search-results"></div>
+      </div>
+
+      <!-- Auto Check-in -->
+      <div class="set-section">
+        <h2 class="set-title">자동 체크인</h2>
+        <p class="set-desc">앱을 열 때 자동으로 출퇴근 처리</p>
+        <label class="toggle-row">
+          <div class="toggle-text">
+            <div class="toggle-title">앱 열 때 자동 체크인</div>
+            <div class="toggle-desc">사무실 안이면 자동 출근 / 벗어나면 자동 퇴근</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="toggle-auto">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
       </div>
 
       <!-- Info -->
@@ -699,6 +827,8 @@ const state = {
   calYear: new Date().getFullYear(),
   calMonth: new Date().getMonth(),
   editingKey: null, // date key or '__manual__'
+  autoCheckin: false, // 자동 체크인/아웃 on/off
+  autoChecked: false, // 이번 세션에서 자동 체크가 이미 실행됐는지
 };
 
 // ============ Storage ============
@@ -797,6 +927,8 @@ function startWatchingLocation() {
       state.locError = null;
       renderLocation();
       renderHeroButton();
+      // 자동 체크인/아웃 시도
+      tryAutoCheckInOut();
     },
     (err) => {
       state.locError = err.message;
@@ -845,21 +977,91 @@ function handleCheckOut() {
 }
 
 // ============ Search office ============
+// 카카오 SDK가 로드되었고 유효한 키가 있는지 체크
+function hasKakao() {
+  return typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services
+    && !(document.querySelector('script[src*="kakao"]').src.includes('KAKAO_KEY_HERE'));
+}
+
 async function searchAddress() {
   const q = document.getElementById('search-input').value.trim();
   if (!q) return;
   const btn = document.getElementById('search-btn');
   btn.disabled = true;
+
+  // 1순위: 카카오 주소검색 (키 있을 때)
+  if (hasKakao()) {
+    try {
+      await searchWithKakao(q);
+    } catch (e) {
+      console.error(e);
+      showToast('카카오 검색 실패', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  // 2순위: OpenStreetMap (카카오 키 없을 때 fallback)
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&accept-language=ko`);
     const data = await res.json();
-    renderSearchResults(data);
+    const results = data.map(r => ({
+      name: r.display_name,
+      lat: parseFloat(r.lat),
+      lon: parseFloat(r.lon),
+    }));
+    renderSearchResults(results);
   } catch (e) {
     showToast('주소 검색 실패', 'error');
   } finally {
     btn.disabled = false;
   }
 }
+
+// 카카오 주소 검색 (키워드 + 주소 둘 다 시도)
+function searchWithKakao(query) {
+  return new Promise((resolve) => {
+    kakao.maps.load(() => {
+      const geocoder = new kakao.maps.services.Geocoder();
+      const places = new kakao.maps.services.Places();
+      const allResults = [];
+
+      // 주소 검색
+      geocoder.addressSearch(query, (addrResult, addrStatus) => {
+        if (addrStatus === kakao.maps.services.Status.OK) {
+          addrResult.forEach(r => {
+            allResults.push({
+              name: r.address_name + (r.road_address ? ` (${r.road_address.address_name})` : ''),
+              lat: parseFloat(r.y),
+              lon: parseFloat(r.x),
+            });
+          });
+        }
+        // 장소 검색 (키워드)
+        places.keywordSearch(query, (placeResult, placeStatus) => {
+          if (placeStatus === kakao.maps.services.Status.OK) {
+            placeResult.slice(0, 5).forEach(p => {
+              // 중복 제거
+              const exists = allResults.some(r => Math.abs(r.lat - parseFloat(p.y)) < 0.0001 && Math.abs(r.lon - parseFloat(p.x)) < 0.0001);
+              if (!exists) {
+                allResults.push({
+                  name: p.place_name + ' · ' + (p.road_address_name || p.address_name),
+                  lat: parseFloat(p.y),
+                  lon: parseFloat(p.x),
+                });
+              }
+            });
+          }
+          renderSearchResults(allResults.slice(0, 8));
+          if (allResults.length === 0) showToast('검색 결과가 없습니다', 'error');
+          resolve();
+        });
+      });
+    });
+  });
+}
+
 function renderSearchResults(results) {
   const container = document.getElementById('search-results');
   container.innerHTML = '';
@@ -867,15 +1069,16 @@ function renderSearchResults(results) {
     const btn = document.createElement('button');
     btn.className = 'search-item';
     btn.innerHTML = `
-      <div class="name">${r.display_name}</div>
-      <div class="coord">${parseFloat(r.lat).toFixed(5)}, ${parseFloat(r.lon).toFixed(5)}</div>
+      <div class="name">${r.name}</div>
+      <div class="coord">${r.lat.toFixed(5)}, ${r.lon.toFixed(5)}</div>
     `;
     btn.onclick = () => selectOffice(r);
     container.appendChild(btn);
   });
 }
+
 function selectOffice(r) {
-  state.office = { lat: parseFloat(r.lat), lon: parseFloat(r.lon), name: r.display_name };
+  state.office = { lat: r.lat, lon: r.lon, name: r.name };
   storageSet('office', state.office);
   document.getElementById('search-input').value = '';
   document.getElementById('search-results').innerHTML = '';
@@ -883,6 +1086,43 @@ function selectOffice(r) {
   renderOfficeBox();
   startWatchingLocation();
   setView('home');
+}
+
+// ============ 현재 위치를 사무실로 지정 ============
+function setOfficeFromCurrentLocation() {
+  if (!navigator.geolocation) {
+    showToast('이 기기는 위치 기능을 지원하지 않습니다', 'error');
+    return;
+  }
+  const btn = document.getElementById('btn-current-loc');
+  const originalText = btn.querySelector('span').textContent;
+  btn.disabled = true;
+  btn.querySelector('span').textContent = '위치 확인 중...';
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const name = `현재 위치 (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
+      state.office = { lat: latitude, lon: longitude, name };
+      storageSet('office', state.office);
+      showToast('현재 위치가 사무실로 저장되었습니다', 'success');
+      renderOfficeBox();
+      startWatchingLocation();
+      btn.disabled = false;
+      btn.querySelector('span').textContent = originalText;
+      setView('home');
+    },
+    (err) => {
+      let msg = '위치를 가져올 수 없습니다';
+      if (err.code === 1) msg = '위치 권한이 거부되었습니다';
+      else if (err.code === 2) msg = 'GPS 신호를 찾을 수 없습니다';
+      else if (err.code === 3) msg = '위치 확인 시간 초과';
+      showToast(msg, 'error');
+      btn.disabled = false;
+      btn.querySelector('span').textContent = originalText;
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
 }
 function renderOfficeBox() {
   const wrap = document.getElementById('office-box-wrap');
@@ -1145,6 +1385,62 @@ function renderCalendar() {
   }
 }
 
+// ============ 자동 체크인/아웃 ============
+function tryAutoCheckInOut() {
+  if (!state.autoCheckin) return;
+  if (!state.office || state.distance == null) return;
+  if (state.autoChecked) return; // 이번 세션에 이미 실행됨
+
+  const inside = state.distance <= CHECK_RADIUS_M;
+
+  if (inside && !state.session) {
+    // 사무실 안인데 출근 안 한 상태 → 자동 출근
+    // 단, 오늘 이미 퇴근 기록이 있으면 재출근으로 처리
+    const todayKey = toDateKey(new Date());
+    const nowDate = new Date();
+    state.session = { checkIn: nowDate.toISOString(), dateKey: todayKey };
+    storageSet('session', state.session);
+    state.autoChecked = true;
+    showToast('자동 출근 체크 완료', 'success');
+    renderAll();
+  } else if (!inside && state.session) {
+    // 사무실 밖인데 출근 중 → 자동 퇴근
+    const nowDate = new Date();
+    const duration = nowDate - new Date(state.session.checkIn);
+    const dateKey = state.session.dateKey;
+    const existing = state.logs[dateKey];
+    const merged = existing ? {
+      checkIn: existing.checkIn,
+      checkOut: nowDate.toISOString(),
+      duration: existing.duration + duration,
+    } : {
+      checkIn: state.session.checkIn,
+      checkOut: nowDate.toISOString(),
+      duration,
+    };
+    state.logs[dateKey] = merged;
+    storageSet('logs', state.logs);
+    state.session = null;
+    storageDelete('session');
+    state.autoChecked = true;
+    showToast(`자동 퇴근 체크 · ${formatDuration(merged.duration)}`, 'success');
+    renderAll();
+  }
+}
+
+function toggleAutoCheckin(enabled) {
+  state.autoCheckin = enabled;
+  storageSet('autoCheckin', enabled);
+  if (enabled) {
+    showToast('자동 체크인이 켜졌습니다', 'success');
+    // 즉시 한 번 시도
+    state.autoChecked = false;
+    setTimeout(tryAutoCheckInOut, 500);
+  } else {
+    showToast('자동 체크인이 꺼졌습니다', 'info');
+  }
+}
+
 function renderAll() {
   renderHeader();
   renderLocation();
@@ -1161,7 +1457,12 @@ function init() {
   state.logs = storageGet('logs', {}) || {};
   state.session = storageGet('session', null);
   state.themeKey = storageGet('themeKey', 'jingcheong');
+  state.autoCheckin = storageGet('autoCheckin', false);
   if (!THEMES[state.themeKey]) state.themeKey = 'jingcheong';
+
+  // 토글 초기 상태 반영
+  const toggleEl = document.getElementById('toggle-auto');
+  if (toggleEl) toggleEl.checked = state.autoCheckin;
 
   applyTheme();
   renderThemeGrid();
@@ -1199,8 +1500,26 @@ function init() {
     if (e.key === 'Enter') searchAddress();
   };
 
+  // 현재 위치로 지정 버튼
+  document.getElementById('btn-current-loc').onclick = setOfficeFromCurrentLocation;
+
+  // 자동 체크인 토글
+  document.getElementById('toggle-auto').onchange = (e) => {
+    toggleAutoCheckin(e.target.checked);
+  };
+
   // Location watch
   if (state.office) startWatchingLocation();
+
+  // 앱이 다시 활성화될 때 (폰 잠금 해제, 탭 복귀 등) 자동 체크 재시도
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      state.autoChecked = false;
+      if (state.office && state.distance != null) {
+        setTimeout(tryAutoCheckInOut, 500);
+      }
+    }
+  });
 
   // Live timer for hero
   setInterval(() => {
