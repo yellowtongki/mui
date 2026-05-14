@@ -242,9 +242,12 @@ body {
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 .cal-cell {
   aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
   border-radius: 8px;
-  padding: 6px;
-  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
   font-size: 12px;
   border: 1px solid var(--card-border);
   background: var(--card);
@@ -253,6 +256,7 @@ body {
   transition: transform 0.15s;
   position: relative;
   font-family: inherit;
+  overflow: hidden;
 }
 .cal-cell:active { transform: scale(0.95); }
 .cal-cell.empty { background: transparent; border: none; cursor: default; }
@@ -260,8 +264,8 @@ body {
 .cal-cell.partial { background: var(--accent-soft); border: none; color: var(--accent); }
 .cal-cell.today { box-shadow: 0 0 0 2px var(--red), 0 0 0 4px var(--cream); }
 .cal-cell.today.qualified { box-shadow: 0 0 0 2px var(--red), 0 0 0 4px var(--cream), 0 4px 10px color-mix(in srgb, var(--accent) 40%, transparent); }
-.cal-cell .day { font-weight: 700; font-size: 13px; }
-.cal-cell .dur { font-size: 9px; font-variant-numeric: tabular-nums; font-weight: 500; line-height: 1; }
+.cal-cell .day { font-weight: 700; font-size: 13px; line-height: 1; }
+.cal-cell .dur { font-size: 8px; font-variant-numeric: tabular-nums; font-weight: 500; line-height: 1; opacity: 0.9; white-space: nowrap; }
 .cal-cell .manual-dot { position: absolute; top: 4px; right: 4px; width: 5px; height: 5px; border-radius: 9999px; background: var(--accent); }
 .cal-cell.qualified .manual-dot { background: rgba(247, 240, 223, 0.7); }
 
@@ -496,7 +500,7 @@ body {
   border-top: 1px solid var(--divider);
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
-.nav-inner { display: grid; grid-template-columns: repeat(3, 1fr); }
+.nav-inner { display: grid; grid-template-columns: repeat(4, 1fr); }
 .nav-btn {
   padding: 12px 0;
   background: transparent; border: none;
@@ -513,7 +517,200 @@ body {
   background: var(--accent);
 }
 .nav-btn svg { width: 20px; height: 20px; }
+
+/* ============ STATS 탭 ============ */
+.stats-month-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px;
+  padding: 4px 24px 14px;
+}
+.stats-month-btn {
+  background: transparent; border: none; padding: 6px;
+  border-radius: 9999px; cursor: pointer;
+}
+.stats-month-btn svg { width: 18px; height: 18px; color: var(--accent); }
+.stats-month-title {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  min-width: 130px; text-align: center;
+}
+
+/* 가로 스와이프 */
+.swiper {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 12px;
+  padding: 0 20px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.swiper::-webkit-scrollbar { display: none; }
+.slide {
+  flex: 0 0 calc(100% - 40px);
+  scroll-snap-align: center;
+}
+.slide-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 400px;
+}
+.slide-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 2px;
+}
+.slide-icon { width: 18px; height: 18px; color: var(--accent); }
+.slide-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.slide-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
+
+/* 슬라이드 1: 요일별 막대 */
+.weekday-bars {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  align-items: end; height: 110px; margin: 18px 0 8px;
+}
+.weekday-bar-wrap { display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+.weekday-bar {
+  width: 100%;
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 75%, #fff));
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  min-height: 3px;
+}
+.weekday-bar.zero { background: #e3d9bf; height: 3px !important; }
+.weekday-bar-hour {
+  position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: var(--text); font-weight: 700; white-space: nowrap;
+}
+.weekday-labels {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  text-align: center; font-size: 10px; color: var(--text-muted);
+}
+.weekday-labels .sun { color: #991b1b; }
+.weekday-labels .sat { color: #1e40af; }
+
+.skpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 16px; }
+.skpi-card {
+  background: var(--bg-a); border: 1px solid var(--card-border);
+  border-radius: 10px; padding: 10px; text-align: center;
+}
+.skpi-label { font-size: 9px; color: var(--text-muted); }
+.skpi-value { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.skpi-value .unit { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-left: 1px; }
+
+/* 슬라이드 2: 점 10칸 */
+.dots10-label {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); text-align: center; margin-bottom: 10px;
+}
+.dots10 {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px;
+  max-width: 230px; margin: 0 auto 8px;
+}
+.dot10 {
+  aspect-ratio: 1; border-radius: 50%;
+  background: #e3d9bf;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #b5a988;
+}
+.dot10.filled {
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));
+  color: var(--cream);
+}
+.dots10-foot {
+  text-align: center; font-size: 13px; color: var(--text-soft);
+  margin-bottom: 16px;
+}
+.dots10-foot .strong {
+  color: var(--accent); font-weight: 700;
+  background: var(--accent-soft);
+  padding: 2px 7px; border-radius: 9999px;
+}
+
+/* 인사이트 */
+.insight-list { }
+.insight-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 0;
+}
+.insight-item + .insight-item { border-top: 1px solid #ede3cb; }
+.insight-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.insight-body { flex: 1; }
+.insight-t { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.insight-d { font-size: 11px; line-height: 1.65; color: var(--text-soft); }
+.insight-d .hi {
+  font-weight: 700; color: var(--accent);
+  background: var(--accent-soft);
+  padding: 1px 6px; border-radius: 6px;
+  font-size: 12px;
+}
+.insight-d .hi-warn {
+  font-weight: 700; color: #991b1b;
+  background: rgba(153,27,27,0.1);
+  padding: 1px 6px; border-radius: 6px;
+  font-size: 12px;
+}
+.insight-d .hi-good {
+  font-weight: 700; color: #2d4a3a;
+  background: rgba(45,74,58,0.1);
+  padding: 1px 6px; border-radius: 6px;
+  font-size: 12px;
+}
+
+/* 슬라이드 3: 전월 비교 */
+.compare-list { }
+.compare-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 0;
+}
+.compare-item + .compare-item { border-top: 1px solid #ede3cb; }
+.compare-label { font-size: 13px; color: var(--text-soft); font-weight: 500; }
+.compare-prev { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.compare-values { display: flex; align-items: center; gap: 8px; }
+.compare-now { font-size: 17px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.compare-now .unit { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 1px; }
+.compare-change {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 9999px;
+  min-width: 46px; text-align: center;
+}
+.compare-change.up { background: rgba(45,74,58,0.15); color: #2d4a3a; }
+.compare-change.down { background: rgba(153,27,27,0.15); color: #991b1b; }
+.compare-change.same { background: #ede3cb; color: var(--text-muted); }
+
+.copy-btn {
+  width: 100%; margin-top: 16px;
+  padding: 12px; border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--bg-a);
+  color: var(--text-soft);
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer;
+}
+.copy-btn svg { width: 14px; height: 14px; }
+
+/* 점 표시 */
+.swiper-dots {
+  display: flex; justify-content: center; gap: 8px;
+  margin-top: 16px;
+}
+.swiper-dot {
+  width: 7px; height: 7px; border-radius: 9999px;
+  background: #d4c9a8; transition: all 0.2s;
+}
+.swiper-dot.active { background: var(--accent); width: 22px; }
+.swiper-tip {
+  text-align: center; font-size: 11px; color: var(--text-muted);
+  margin-top: 10px;
+}
+
+.stats-empty {
+  text-align: center; padding: 30px 16px;
+  color: var(--text-muted); font-size: 12px; line-height: 1.7;
+}
 </style>
+
 </head>
 <body>
 
@@ -730,6 +927,7 @@ body {
           <div class="info-row"><span>체크인 반경</span><span class="val">100m</span></div>
           <div class="info-row"><span>일 최소 체류</span><span class="val">3시간</span></div>
           <div class="info-row"><span>월 최소 출석</span><span class="val">10일</span></div>
+          <div class="info-row"><span>앱 버전</span><span class="val">v1.3</span></div>
         </div>
       </div>
 
@@ -741,6 +939,80 @@ body {
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="view hidden" id="view-stats">
+    <!-- 월 선택 -->
+    <div class="stats-month-row">
+      <button id="stats-prev" class="stats-month-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="stats-month-title" id="stats-month-title">2026년 5월</div>
+      <button id="stats-next" class="stats-month-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <!-- 가로 스와이프 -->
+    <div class="swiper" id="stats-swiper">
+      <!-- 슬라이드 1: 요일별 패턴 -->
+      <div class="slide">
+        <div class="slide-card">
+          <div class="slide-head">
+            <svg class="slide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            <div class="slide-title">요일별 패턴</div>
+          </div>
+          <div class="slide-sub">요일별 평균 체류시간</div>
+          <div class="weekday-bars" id="weekday-bars"></div>
+          <div class="weekday-labels">
+            <div class="sun">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="sat">토</div>
+          </div>
+          <div class="skpi-row" id="skpi-row"></div>
+        </div>
+      </div>
+
+      <!-- 슬라이드 2: 이번 달 코멘트 -->
+      <div class="slide">
+        <div class="slide-card">
+          <div class="slide-head">
+            <svg class="slide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="slide-title">이번 달 코멘트</div>
+          </div>
+          <div class="slide-sub">충족 진행 상황과 맞춤 코멘트</div>
+          <!-- 점 10칸 진행 -->
+          <div class="dots10-label">3시간 충족일</div>
+          <div class="dots10" id="dots10"></div>
+          <div class="dots10-foot" id="dots10-foot"></div>
+          <!-- 코멘트 -->
+          <div class="insight-list" id="insight-list"></div>
+        </div>
+      </div>
+
+      <!-- 슬라이드 3: 전월 비교 -->
+      <div class="slide">
+        <div class="slide-card">
+          <div class="slide-head">
+            <svg class="slide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <div class="slide-title">전월 비교</div>
+          </div>
+          <div class="slide-sub" id="compare-sub">지난달과 비교</div>
+          <div class="compare-list" id="compare-list"></div>
+          <button class="copy-btn" id="copy-stats-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            통계 텍스트 복사
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 점 표시 -->
+    <div class="swiper-dots">
+      <div class="swiper-dot active"></div>
+      <div class="swiper-dot"></div>
+      <div class="swiper-dot"></div>
+    </div>
+    <div class="swiper-tip">← 좌우로 넘기면 다른 통계가 나와요 →</div>
   </div>
 
   <!-- Edit Modal -->
@@ -790,6 +1062,10 @@ body {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>달력</span>
       </button>
+      <button class="nav-btn" data-view="stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        <span>통계</span>
+      </button>
       <button class="nav-btn" data-view="settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>설정</span>
@@ -829,6 +1105,8 @@ const state = {
   editingKey: null, // date key or '__manual__'
   autoCheckin: false, // 자동 체크인/아웃 on/off
   autoChecked: false, // 이번 세션에서 자동 체크가 이미 실행됐는지
+  statsYear: new Date().getFullYear(),
+  statsMonth: new Date().getMonth(),
 };
 
 // ============ Storage ============
@@ -955,18 +1233,24 @@ function handleCheckIn() {
 
 function handleCheckOut() {
   if (!state.session) return;
+  const MAX_SESSION_MS = 12 * 60 * 60 * 1000;
   const nowDate = new Date();
-  const duration = nowDate - new Date(state.session.checkIn);
+  let duration = nowDate - new Date(state.session.checkIn);
+  if (duration > MAX_SESSION_MS) duration = MAX_SESSION_MS;
+
   const dateKey = state.session.dateKey;
   const existing = state.logs[dateKey];
+  let newDuration = existing ? existing.duration + duration : duration;
+  if (newDuration > MAX_SESSION_MS) newDuration = MAX_SESSION_MS;
+
   const merged = existing ? {
     checkIn: existing.checkIn,
     checkOut: nowDate.toISOString(),
-    duration: existing.duration + duration,
+    duration: newDuration,
   } : {
     checkIn: state.session.checkIn,
     checkOut: nowDate.toISOString(),
-    duration,
+    duration: newDuration,
   };
   state.logs[dateKey] = merged;
   storageSet('logs', state.logs);
@@ -1226,13 +1510,14 @@ function deleteLog() {
 // ============ Views ============
 function setView(v) {
   state.view = v;
-  ['home', 'calendar', 'settings'].forEach(k => {
+  ['home', 'calendar', 'settings', 'stats'].forEach(k => {
     document.getElementById('view-' + k).classList.toggle('hidden', k !== v);
   });
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.view === v);
   });
   if (v === 'calendar') renderCalendar();
+  if (v === 'stats') renderStats2();
 }
 
 // ============ Render ============
@@ -1373,11 +1658,21 @@ function renderCalendar() {
     const mins = log ? Math.floor((log.duration % 3600000) / 60000) : 0;
     const hrs = log ? Math.floor(log.duration / 3600000) : 0;
 
+    // 시간 표시: 1시간 이상이면 'Xh' 또는 'Xh+'(30분 이상 추가), 1시간 미만이면 'Xm'
+    let durText = '';
+    if (log) {
+      if (hrs >= 1) {
+        durText = mins >= 30 ? `${hrs}h+` : `${hrs}h`;
+      } else {
+        durText = `${mins}m`;
+      }
+    }
+
     const btn = document.createElement('button');
     btn.className = 'cal-cell' + (qualified ? ' qualified' : partial ? ' partial' : '') + (isToday ? ' today' : '');
     btn.innerHTML = `
       <span class="day">${d}</span>
-      ${log ? `<span class="dur">${hrs}h${mins > 0 ? mins + 'm' : ''}</span>` : ''}
+      ${log ? `<span class="dur">${durText}</span>` : ''}
       ${log && log.manual ? `<span class="manual-dot"></span>` : ''}
     `;
     btn.onclick = () => openEdit(key);
@@ -1392,10 +1687,39 @@ function tryAutoCheckInOut() {
   if (state.autoChecked) return; // 이번 세션에 이미 실행됨
 
   const inside = state.distance <= CHECK_RADIUS_M;
+  const MAX_SESSION_MS = 12 * 60 * 60 * 1000; // 최대 12시간
+
+  // 진행 중인 세션이 너무 오래되었으면 (자정 넘김, 종일 켜둠 등) 강제 정리
+  if (state.session) {
+    const sessionAge = Date.now() - new Date(state.session.checkIn).getTime();
+    if (sessionAge > MAX_SESSION_MS) {
+      // 12시간으로 잘라서 세션 종료
+      const checkInDate = new Date(state.session.checkIn);
+      const forceCheckOut = new Date(checkInDate.getTime() + MAX_SESSION_MS);
+      const dateKey = state.session.dateKey;
+      const existing = state.logs[dateKey];
+      const duration = MAX_SESSION_MS;
+      const merged = existing && existing.duration + duration <= MAX_SESSION_MS ? {
+        checkIn: existing.checkIn,
+        checkOut: forceCheckOut.toISOString(),
+        duration: existing.duration + duration,
+      } : {
+        checkIn: state.session.checkIn,
+        checkOut: forceCheckOut.toISOString(),
+        duration: Math.min(duration, MAX_SESSION_MS),
+      };
+      state.logs[dateKey] = merged;
+      storageSet('logs', state.logs);
+      state.session = null;
+      storageDelete('session');
+      showToast('이전 세션 자동 마감 (12시간)', 'info');
+      renderAll();
+      // 마감 후에 새로 체크인 시도하기 위해 계속 진행
+    }
+  }
 
   if (inside && !state.session) {
     // 사무실 안인데 출근 안 한 상태 → 자동 출근
-    // 단, 오늘 이미 퇴근 기록이 있으면 재출근으로 처리
     const todayKey = toDateKey(new Date());
     const nowDate = new Date();
     state.session = { checkIn: nowDate.toISOString(), dateKey: todayKey };
@@ -1406,17 +1730,24 @@ function tryAutoCheckInOut() {
   } else if (!inside && state.session) {
     // 사무실 밖인데 출근 중 → 자동 퇴근
     const nowDate = new Date();
-    const duration = nowDate - new Date(state.session.checkIn);
+    let duration = nowDate - new Date(state.session.checkIn);
+    // 12시간 초과 시 12시간으로 제한 (이상 데이터 방지)
+    if (duration > MAX_SESSION_MS) duration = MAX_SESSION_MS;
+
     const dateKey = state.session.dateKey;
     const existing = state.logs[dateKey];
+    let newDuration = existing ? existing.duration + duration : duration;
+    // 일일 최대 12시간 제한
+    if (newDuration > MAX_SESSION_MS) newDuration = MAX_SESSION_MS;
+
     const merged = existing ? {
       checkIn: existing.checkIn,
       checkOut: nowDate.toISOString(),
-      duration: existing.duration + duration,
+      duration: newDuration,
     } : {
       checkIn: state.session.checkIn,
       checkOut: nowDate.toISOString(),
-      duration,
+      duration: newDuration,
     };
     state.logs[dateKey] = merged;
     storageSet('logs', state.logs);
@@ -1441,12 +1772,354 @@ function toggleAutoCheckin(enabled) {
   }
 }
 
+// ============ 월간 통계 계산 ============
+const REQUIRED_HOURS_MS = REQUIRED_HOURS * 3600000;
+
+// 특정 연/월의 로그 집계
+function getMonthStats(year, month) {
+  const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const entries = Object.entries(state.logs)
+    .filter(([k]) => k.startsWith(prefix))
+    .map(([k, v]) => ({ key: k, ...v }));
+
+  const attendedDays = entries.length;
+  const qualifiedDays = entries.filter(e => e.duration >= REQUIRED_HOURS_MS).length;
+  const totalMs = entries.reduce((s, e) => s + e.duration, 0);
+  const totalHours = totalMs / 3600000;
+  const avgHours = attendedDays > 0 ? totalHours / attendedDays : 0;
+
+  // 요일별 평균 (0=일 ~ 6=토)
+  const weekdayMs = [[], [], [], [], [], [], []];
+  entries.forEach(e => {
+    const [y, m, d] = e.key.split('-').map(Number);
+    const wd = new Date(y, m - 1, d).getDay();
+    weekdayMs[wd].push(e.duration);
+  });
+  const weekdayAvg = weekdayMs.map(arr =>
+    arr.length > 0 ? arr.reduce((s, v) => s + v, 0) / arr.length : 0
+  );
+
+  // 최장 체류
+  let maxDuration = 0;
+  entries.forEach(e => { if (e.duration > maxDuration) maxDuration = e.duration; });
+
+  // 가장 이른 출근 시각
+  let earliestMin = null;
+  entries.forEach(e => {
+    if (!e.checkIn) return;
+    const ci = new Date(e.checkIn);
+    const min = ci.getHours() * 60 + ci.getMinutes();
+    if (earliestMin === null || min < earliestMin) earliestMin = min;
+  });
+
+  // 최대 연속 출근일
+  const sortedDays = entries.map(e => e.key).sort();
+  let maxStreak = 0, curStreak = 0, prevDate = null;
+  sortedDays.forEach(key => {
+    const [y, m, d] = key.split('-').map(Number);
+    const cur = new Date(y, m - 1, d);
+    if (prevDate) {
+      const diff = (cur - prevDate) / 86400000;
+      if (diff === 1) curStreak++;
+      else curStreak = 1;
+    } else {
+      curStreak = 1;
+    }
+    if (curStreak > maxStreak) maxStreak = curStreak;
+    prevDate = cur;
+  });
+
+  return {
+    attendedDays, qualifiedDays, totalHours, avgHours,
+    weekdayAvg, maxDuration, earliestMin, maxStreak,
+    hasData: attendedDays > 0,
+  };
+}
+
+function fmtMin(min) {
+  if (min === null) return '--:--';
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+function fmtHM(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h${m}m`;
+}
+
+// ============ 통계 탭 렌더링 ============
+function renderStats2() {
+  const y = state.statsYear, m = state.statsMonth;
+  document.getElementById('stats-month-title').textContent = `${y}년 ${m + 1}월`;
+
+  const stats = getMonthStats(y, m);
+  const WEEKDAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+  // ---- 슬라이드 1: 요일별 패턴 ----
+  const barsEl = document.getElementById('weekday-bars');
+  const maxAvg = Math.max(...stats.weekdayAvg, 1);
+  barsEl.innerHTML = '';
+  for (let wd = 0; wd < 7; wd++) {
+    const avg = stats.weekdayAvg[wd];
+    const wrap = document.createElement('div');
+    wrap.className = 'weekday-bar-wrap';
+    if (avg > 0) {
+      const heightPct = Math.max((avg / maxAvg) * 100, 8);
+      const hrs = avg / 3600000;
+      const label = hrs >= 1 ? `${hrs.toFixed(1)}h` : `${Math.round(avg / 60000)}m`;
+      wrap.innerHTML = `<div class="weekday-bar" style="height:${heightPct}%"><span class="weekday-bar-hour">${label}</span></div>`;
+    } else {
+      wrap.innerHTML = `<div class="weekday-bar zero"></div>`;
+    }
+    barsEl.appendChild(wrap);
+  }
+
+  // 보조 KPI
+  const skpiEl = document.getElementById('skpi-row');
+  skpiEl.innerHTML = `
+    <div class="skpi-card">
+      <div class="skpi-label">최장 체류</div>
+      <div class="skpi-value">${stats.maxDuration > 0 ? fmtHM(stats.maxDuration) : '-'}</div>
+    </div>
+    <div class="skpi-card">
+      <div class="skpi-label">이른 출근</div>
+      <div class="skpi-value">${fmtMin(stats.earliestMin)}</div>
+    </div>
+    <div class="skpi-card">
+      <div class="skpi-label">연속 출근</div>
+      <div class="skpi-value">${stats.maxStreak}<span class="unit">일</span></div>
+    </div>
+  `;
+
+  // ---- 슬라이드 2: 점 10칸 + 코멘트 ----
+  const dots10El = document.getElementById('dots10');
+  dots10El.innerHTML = '';
+  for (let i = 1; i <= REQUIRED_DAYS; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot10' + (i <= stats.qualifiedDays ? ' filled' : '');
+    dot.textContent = i;
+    dots10El.appendChild(dot);
+  }
+  const remain = Math.max(REQUIRED_DAYS - stats.qualifiedDays, 0);
+  const dots10Foot = document.getElementById('dots10-foot');
+  if (stats.qualifiedDays >= REQUIRED_DAYS) {
+    dots10Foot.innerHTML = `<span class="strong">${stats.qualifiedDays}일</span> 충족 · 목표 달성! 🎉`;
+  } else {
+    dots10Foot.innerHTML = `<span class="strong">${stats.qualifiedDays}칸</span> 채움 · <span class="strong">${remain}칸</span> 남음`;
+  }
+
+  // 인사이트 코멘트 생성
+  renderInsights(stats, y, m);
+
+  // ---- 슬라이드 3: 전월 비교 ----
+  renderCompare(stats, y, m);
+}
+
+// 인사이트 메시지 생성
+function renderInsights(stats, y, m) {
+  const listEl = document.getElementById('insight-list');
+  const WEEKDAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+  if (!stats.hasData) {
+    listEl.innerHTML = `<div class="stats-empty">아직 ${m + 1}월 출근 기록이 없어요.<br>기록이 쌓이면 맞춤 코멘트를 보여드릴게요.</div>`;
+    return;
+  }
+
+  const items = [];
+
+  // 1) 충족 진행 상황
+  const remain = REQUIRED_DAYS - stats.qualifiedDays;
+  if (stats.qualifiedDays >= REQUIRED_DAYS) {
+    items.push({
+      emoji: '👑',
+      title: '이번 달 목표 달성!',
+      desc: `3시간 충족 <span class="hi-good">${stats.qualifiedDays}/${REQUIRED_DAYS}일</span> 완료. 여왕님 멋지세요!`,
+    });
+  } else {
+    // 이번 달인지 확인
+    const now = new Date();
+    const isThisMonth = (y === now.getFullYear() && m === now.getMonth());
+    if (isThisMonth) {
+      // 남은 평일 계산
+      const lastDay = new Date(y, m + 1, 0).getDate();
+      let weekdaysLeft = 0;
+      for (let d = now.getDate() + 1; d <= lastDay; d++) {
+        const wd = new Date(y, m, d).getDay();
+        if (wd !== 0 && wd !== 6) weekdaysLeft++;
+      }
+      items.push({
+        emoji: '⏳',
+        title: `충족일 ${remain}일 부족`,
+        desc: `이번 달 <span class="hi-warn">${stats.qualifiedDays}/${REQUIRED_DAYS}일</span> 달성. 평일 <span class="hi">${weekdaysLeft}일</span> 남았으니 ${weekdaysLeft >= remain ? '페이스 유지 시 충분히 가능해요.' : '조금 서두르셔야 해요.'}`,
+      });
+    } else {
+      items.push({
+        emoji: remain > 0 ? '📋' : '✅',
+        title: remain > 0 ? `충족 ${stats.qualifiedDays}/${REQUIRED_DAYS}일` : '목표 달성',
+        desc: `${m + 1}월에 3시간 충족 <span class="hi">${stats.qualifiedDays}일</span>, 총 출석 <span class="hi">${stats.attendedDays}일</span> 기록했어요.`,
+      });
+    }
+  }
+
+  // 2) 요일 패턴 (데이터 2일 이상일 때)
+  if (stats.attendedDays >= 2) {
+    let maxWd = -1, maxVal = 0;
+    for (let wd = 1; wd <= 5; wd++) {
+      if (stats.weekdayAvg[wd] > maxVal) { maxVal = stats.weekdayAvg[wd]; maxWd = wd; }
+    }
+    if (maxWd >= 0 && maxVal > 0) {
+      const hrs = (maxVal / 3600000).toFixed(1);
+      items.push({
+        emoji: '📅',
+        title: `여왕님의 황금 요일은 ${WEEKDAY_NAMES[maxWd]}요일`,
+        desc: `평균 <span class="hi-good">${hrs}시간</span>으로 가장 오래 머무세요.`,
+      });
+    }
+  }
+
+  // 3) 전월 대비
+  let pm = m - 1, py = y;
+  if (pm < 0) { pm = 11; py = y - 1; }
+  const prev = getMonthStats(py, pm);
+  if (prev.hasData) {
+    const diffQual = stats.qualifiedDays - prev.qualifiedDays;
+    const diffHours = stats.totalHours - prev.totalHours;
+    if (diffQual > 0 || diffHours > 0) {
+      items.push({
+        emoji: '📈',
+        title: '지난달보다 잘하고 있어요',
+        desc: `${pm + 1}월보다 ${diffQual > 0 ? `<span class="hi">충족 +${diffQual}일</span>` : ''}${diffQual > 0 && diffHours > 0 ? ', ' : ''}${diffHours > 0 ? `<span class="hi">총 체류 +${Math.round(diffHours)}시간</span>` : ''} 늘었습니다.`,
+      });
+    } else if (diffQual < 0 || diffHours < 0) {
+      items.push({
+        emoji: '💪',
+        title: '지난달보다 조금 줄었어요',
+        desc: `${pm + 1}월 대비 ${diffQual < 0 ? `<span class="hi-warn">충족 ${diffQual}일</span>` : ''}${diffQual < 0 && diffHours < 0 ? ', ' : ''}${diffHours < 0 ? `<span class="hi-warn">체류 ${Math.round(diffHours)}시간</span>` : ''}. 다시 페이스 올려봐요!`,
+      });
+    }
+  }
+
+  listEl.innerHTML = items.map(it => `
+    <div class="insight-item">
+      <div class="insight-emoji">${it.emoji}</div>
+      <div class="insight-body">
+        <div class="insight-t">${it.title}</div>
+        <div class="insight-d">${it.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 전월 비교 렌더링
+function renderCompare(stats, y, m) {
+  let pm = m - 1, py = y;
+  if (pm < 0) { pm = 11; py = y - 1; }
+  const prev = getMonthStats(py, pm);
+
+  document.getElementById('compare-sub').textContent = `${m + 1}월 vs ${pm + 1}월`;
+
+  const listEl = document.getElementById('compare-list');
+
+  if (!prev.hasData) {
+    listEl.innerHTML = `<div class="stats-empty">${pm + 1}월 기록이 없어 비교할 수 없어요.<br>다음 달부터 전월 비교가 표시됩니다.</div>`;
+    document.getElementById('copy-stats-btn').style.display = 'none';
+    return;
+  }
+  document.getElementById('copy-stats-btn').style.display = '';
+
+  const rows = [
+    { label: '3시간 충족일', now: stats.qualifiedDays, prev: prev.qualifiedDays, unit: '일' },
+    { label: '총 출석일', now: stats.attendedDays, prev: prev.attendedDays, unit: '일' },
+    { label: '총 체류시간', now: Math.round(stats.totalHours), prev: Math.round(prev.totalHours), unit: 'h' },
+    { label: '일 평균 체류', now: Number(stats.avgHours.toFixed(1)), prev: Number(prev.avgHours.toFixed(1)), unit: 'h' },
+  ];
+
+  listEl.innerHTML = rows.map(r => {
+    const diff = Number((r.now - r.prev).toFixed(1));
+    let changeClass, changeText;
+    if (diff > 0) { changeClass = 'up'; changeText = `▲ +${diff}`; }
+    else if (diff < 0) { changeClass = 'down'; changeText = `▼ ${diff}`; }
+    else { changeClass = 'same'; changeText = '— 0'; }
+    return `
+      <div class="compare-item">
+        <div>
+          <div class="compare-label">${r.label}</div>
+          <div class="compare-prev">지난달 ${r.prev}${r.unit}</div>
+        </div>
+        <div class="compare-values">
+          <div class="compare-now">${r.now}<span class="unit">${r.unit}</span></div>
+          <div class="compare-change ${changeClass}">${changeText}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 스와이프 점 업데이트
+function updateSwiperDots(idx) {
+  document.querySelectorAll('.swiper-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+}
+
+// 통계 텍스트 복사
+function copyStatsText() {
+  const y = state.statsYear, m = state.statsMonth;
+  const stats = getMonthStats(y, m);
+  let pm = m - 1, py = y;
+  if (pm < 0) { pm = 11; py = y - 1; }
+  const prev = getMonthStats(py, pm);
+
+  let text = `[안지수 여왕님의 무이] ${y}년 ${m + 1}월 통계\n`;
+  text += `━━━━━━━━━━━━━━\n`;
+  text += `· 3시간 충족: ${stats.qualifiedDays}/${REQUIRED_DAYS}일\n`;
+  text += `· 총 출석: ${stats.attendedDays}일\n`;
+  text += `· 총 체류시간: ${Math.round(stats.totalHours)}시간\n`;
+  text += `· 일 평균 체류: ${stats.avgHours.toFixed(1)}시간\n`;
+  if (stats.maxDuration > 0) text += `· 최장 체류: ${fmtHM(stats.maxDuration)}\n`;
+  if (stats.earliestMin !== null) text += `· 가장 이른 출근: ${fmtMin(stats.earliestMin)}\n`;
+  if (stats.maxStreak > 0) text += `· 최대 연속 출근: ${stats.maxStreak}일\n`;
+  if (prev.hasData) {
+    const dq = stats.qualifiedDays - prev.qualifiedDays;
+    text += `━━━━━━━━━━━━━━\n`;
+    text += `전월 대비 충족일 ${dq >= 0 ? '+' : ''}${dq}일\n`;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('통계가 복사되었습니다', 'success'))
+      .catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('통계가 복사되었습니다', 'success');
+  } catch {
+    showToast('복사 실패 - 직접 선택해주세요', 'error');
+  }
+  document.body.removeChild(ta);
+}
+
 function renderAll() {
   renderHeader();
   renderLocation();
   renderHero();
   renderStats();
   if (state.view === 'calendar') renderCalendar();
+  if (state.view === 'stats') renderStats2();
   renderOfficeBox();
 }
 
@@ -1507,6 +2180,34 @@ function init() {
   document.getElementById('toggle-auto').onchange = (e) => {
     toggleAutoCheckin(e.target.checked);
   };
+
+  // 통계 탭: 월 이동
+  document.getElementById('stats-prev').onclick = () => {
+    if (state.statsMonth === 0) { state.statsYear--; state.statsMonth = 11; }
+    else state.statsMonth--;
+    renderStats2();
+    // 첫 슬라이드로 스크롤 리셋
+    document.getElementById('stats-swiper').scrollLeft = 0;
+    updateSwiperDots(0);
+  };
+  document.getElementById('stats-next').onclick = () => {
+    if (state.statsMonth === 11) { state.statsYear++; state.statsMonth = 0; }
+    else state.statsMonth++;
+    renderStats2();
+    document.getElementById('stats-swiper').scrollLeft = 0;
+    updateSwiperDots(0);
+  };
+
+  // 통계 탭: 스와이프 점 표시
+  const statsSwiper = document.getElementById('stats-swiper');
+  statsSwiper.addEventListener('scroll', () => {
+    const slideW = statsSwiper.clientWidth - 40 + 12;
+    const idx = Math.round(statsSwiper.scrollLeft / slideW);
+    updateSwiperDots(idx);
+  });
+
+  // 통계 탭: 텍스트 복사
+  document.getElementById('copy-stats-btn').onclick = copyStatsText;
 
   // Location watch
   if (state.office) startWatchingLocation();
